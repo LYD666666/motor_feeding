@@ -1,4 +1,4 @@
-#include <Arduino.h>
+ #include <Arduino.h>
 #include <ArduinoJson.h>
 #include <WiFi.h>
 #include <PubSubClient.h>
@@ -6,6 +6,7 @@
 #include "motor.h"
 #include "math.h"
 #include <stdio.h>
+
 
 //投食
 //#define touch1_debug 1
@@ -33,9 +34,10 @@ void sendADC(void); //Task1 称重并发送云平台任务
 void pushrod(void *pvParameter); //Task2 推杆状态发送云任务
 void weight_request(void *pvPrameter); 
 void callback(char *topic, byte *payload, unsigned int length); //mqtt回调
-void whenisfinish (void);
+void whenisfinish(void);
 void ResetWeight(void);
 
+int a = 1;
 long count;
 long count0;
 long count1 = 400;
@@ -247,6 +249,7 @@ void whenisfinish (void)
     }
     else if (weight_Notyet<=0)
     {
+            a = 0;
             weight = 0;   //数据清空
             flag = 1;
             list_flag = 1;
@@ -255,8 +258,8 @@ void whenisfinish (void)
             digitalWrite(valve,LOW);
             delay(1000);
             /*最后一次投喂*/
-            client.publish(topic4, rst);
-            client.publish(topic2,situate_finish);
+            //client.publish(topic4, rst);
+            //client.publish(topic2,situate_finish);
             
           
       }
@@ -433,9 +436,11 @@ void loop()
     }
   else if(castbegin_num == 2)                      //如果云平台发送off就会开在关闭无法运行，要云平台发on才能运行
   {
-    snprintf(msgJson, 80, datastausF, weight_real);  //将称重数据套入dataWeight模板中, 生成的字符串传给msgJson5
-    client.publish(topic1,msgJson);
-    client.publish(topic2,situate_ready);
+    if(a == 1)
+    {
+      client.publish(topic2,situate_ready);
+      a = 0;
+    }
     digitalWrite(valve,LOW);
     delay(1000);
     Serial.println("off");
